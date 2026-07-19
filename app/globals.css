@@ -1001,6 +1001,61 @@ details a {
   margin-bottom: 28px;
 }
 
+.catalogue-description {
+  max-width: 660px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.catalogue-type-tabs {
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.catalogue-type-tabs button {
+  min-height: 68px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: 15px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.catalogue-type-tabs button:hover {
+  transform: translateY(-2px);
+}
+
+.catalogue-type-tabs button.active {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 5px 5px 0 var(--sun);
+}
+
+.catalogue-type-tabs strong {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--sun);
+  color: var(--ink);
+  font-size: 13px;
+}
+
 .catalogue-stats {
   display: flex;
   gap: 10px;
@@ -1525,6 +1580,17 @@ footer > a:last-child {
   .view-tabs {
     display: flex;
     overflow-x: auto;
+  }
+
+  .catalogue-type-tabs {
+    display: flex;
+    overflow-x: auto;
+    padding: 3px 6px 9px 2px;
+  }
+
+  .catalogue-type-tabs button {
+    min-width: 180px;
+    flex: 0 0 auto;
   }
 
   .view-tabs button {

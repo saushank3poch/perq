@@ -35,8 +35,10 @@ test("server-renders the Perq offer tracker", async () => {
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
   assert.match(html, /Emirates Emeralde/);
-  assert.match(html, /Every offer\. One ranked list\./);
-  assert.match(html, /Complimentary First-Class Lounge Access/);
+  assert.match(html, /Ranked offers/);
+  assert.match(html, />Offers</);
+  assert.match(html, />Card benefits</);
+  assert.match(html, />Memberships</);
   assert.match(html, /Just For You personalized offers/);
   assert.match(html, /Open official details/);
   assert.match(html, /How ranking works/);
@@ -65,6 +67,22 @@ test("keeps issuer datasets in the unified catalogue", async () => {
   assert.match(allPerks, /\.\.\.amexPlatinumPerks/);
   assert.match(allPerks, /\.\.\.hdfcInfiniaPerks/);
   assert.match(allPerks, /\.\.\.emiratesPerks/);
+  assert.match(amex, /Marriott Bonvoy Gold Elite status/);
+  assert.match(amex, /ALL Accor\+ Explorer membership/);
+  assert.match(
+    amex,
+    /id: "amex-international-airline-program"[\s\S]*?kind: "card-benefit"/,
+  );
+  assert.match(
+    amex,
+    /id: "amex-global-lounge-collection"[\s\S]*?kind: "card-benefit"/,
+  );
+
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /perk\.kind === "membership"\) return "memberships"/);
+  assert.match(page, /perk\.kind === "rewards-program"/);
+  assert.match(page, /perk\.kind === "earning-channel" && !perk\.endDate/);
+  assert.match(allPerks, /title === "Annual Zomato Gold membership/);
 });
 
 test("removes starter assets and keeps local preferences private", async () => {

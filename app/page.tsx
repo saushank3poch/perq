@@ -13,6 +13,7 @@ import type {
 type CategoryFilter = "All" | PerkCategory;
 type ViewFilter = "current" | "ending" | "ongoing" | "archive";
 type SortMode = "ranked" | "expiry" | "value";
+type CatalogueTab = "offers" | "benefits" | "memberships";
 
 type Card = {
   id: CardId;
@@ -47,6 +48,32 @@ const views: { id: ViewFilter; label: string }[] = [
   { id: "archive", label: "Archive" },
 ];
 
+const catalogueTabs: {
+  id: CatalogueTab;
+  label: string;
+  heading: string;
+  description: string;
+}[] = [
+  {
+    id: "offers",
+    label: "Offers",
+    heading: "Ranked offers",
+    description: "Merchant deals, earning routes, milestones and events—ranked by value and urgency.",
+  },
+  {
+    id: "benefits",
+    label: "Card benefits",
+    heading: "Card benefits",
+    description: "Ongoing card features such as lounge access, premium-cabin fares and protection.",
+  },
+  {
+    id: "memberships",
+    label: "Memberships",
+    heading: "Memberships",
+    description: "Hotel, dining and lifestyle memberships included with your selected cards.",
+  },
+];
+
 const allCardIds = cards.map((card) => card.id);
 const DAY = 1000 * 60 * 60 * 24;
 
@@ -67,6 +94,19 @@ function effectiveStatus(perk: UnifiedPerk): PerkStatus {
   if (perk.endDate && daysUntil(perk.endDate) < 0) return "expired";
   if (perk.startDate && dateAtStartOfDay(perk.startDate) > Date.now()) return "upcoming";
   return perk.status;
+}
+
+function catalogueTabFor(perk: UnifiedPerk): CatalogueTab {
+  if (perk.kind === "membership") return "memberships";
+  if (
+    perk.kind === "card-benefit" ||
+    perk.kind === "protection" ||
+    perk.kind === "rewards-program" ||
+    (perk.kind === "earning-channel" && !perk.endDate)
+  ) {
+    return "benefits";
+  }
+  return "offers";
 }
 
 function rankScore(perk: UnifiedPerk) {
@@ -131,6 +171,7 @@ function formatCount(count: number, singular: string, plural = `${singular}s`) {
 
 export default function Home() {
   const [selectedCards, setSelectedCards] = useState<CardId[]>(allCardIds);
+  const [catalogueTab, setCatalogueTab] = useState<CatalogueTab>("offers");
   const [category, setCategory] = useState<CategoryFilter>("All");
   const [view, setView] = useState<ViewFilter>("current");
   const [sortBy, setSortBy] = useState<SortMode>("ranked");
@@ -168,9 +209,14 @@ export default function Home() {
   const selectedCurrentPerks = useMemo(
     () =>
       allPerks
-        .filter((perk) => selectedCards.includes(perk.cardId) && effectiveStatus(perk) !== "expired")
+        .filter(
+          (perk) =>
+            selectedCards.includes(perk.cardId) &&
+            catalogueTabFor(perk) === catalogueTab &&
+            effectiveStatus(perk) !== "expired",
+        )
         .sort((a, b) => rankScore(b) - rankScore(a)),
-    [selectedCards],
+    [catalogueTab, selectedCards],
   );
 
   const visiblePerks = useMemo(() => {
@@ -189,6 +235,7 @@ export default function Home() {
       const haystack = `${perk.provider} ${perk.title} ${perk.summary} ${perk.value} ${kindLabel(perk.kind)}`.toLocaleLowerCase("en-IN");
       return (
         selectedCards.includes(perk.cardId) &&
+        catalogueTabFor(perk) === catalogueTab &&
         (category === "All" || perk.category === category) &&
         matchesView &&
         (!normalizedQuery || haystack.includes(normalizedQuery))
@@ -200,7 +247,26 @@ export default function Home() {
       if (sortBy === "value") return (b.valueAmount ?? 0) - (a.valueAmount ?? 0);
       return rankScore(b) - rankScore(a);
     });
-  }, [category, query, selectedCards, sortBy, view]);
+  }, [catalogueTab, category, query, selectedCards, sortBy, view]);
+
+  const tabCounts = useMemo(
+    () =>
+      catalogueTabs.reduce<Record<CatalogueTab, number>>(
+        (counts, item) => ({
+          ...counts,
+          [item.id]: allPerks.filter(
+            (perk) =>
+              selectedCards.includes(perk.cardId) &&
+              catalogueTabFor(perk) === item.id &&
+              effectiveStatus(perk) !== "expired",
+          ).length,
+        }),
+        { offers: 0, benefits: 0, memberships: 0 },
+      ),
+    [selectedCards],
+  );
+
+  const activeCatalogueTab = catalogueTabs.find((item) => item.id === catalogueTab)!;
 
   const topPerk = selectedCurrentPerks[0];
   const topCard = topPerk ? cards.find((card) => card.id === topPerk.cardId) : cards[0];
@@ -314,8 +380,9 @@ export default function Home() {
       <section className="catalogue-section" id="catalogue" aria-labelledby="catalogue-title">
         <div className="catalogue-intro">
           <div>
-            <p className="eyebrow">Unified catalogue</p>
-            <h2 id="catalogue-title">Every offer. One ranked list.</h2>
+            <p className="eyebrow">Your card catalogue</p>
+            <h2 id="catalogue-title">{activeCatalogueTab.heading}</h2>
+            <p className="catalogue-description">{activeCatalogueTab.description}</p>
           </div>
           <div className="catalogue-stats" aria-label="Catalogue summary" aria-live="polite">
             <span><strong>{visiblePerks.length}</strong> showing</span>
@@ -324,14 +391,34 @@ export default function Home() {
           </div>
         </div>
 
+        <div className="catalogue-type-tabs" role="group" aria-label="Catalogue type">
+          {catalogueTabs.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={catalogueTab === item.id}
+              className={catalogueTab === item.id ? "active" : ""}
+              onClick={() => {
+                setCatalogueTab(item.id);
+                setCategory("All");
+                setView("current");
+                setQuery("");
+              }}
+            >
+              <span>{item.label}</span>
+              <strong>{tabCounts[item.id]}</strong>
+            </button>
+          ))}
+        </div>
+
         <div className="catalogue-controls">
           <label className="catalogue-search" htmlFor="catalogue-search">
-            <span>Search everything</span>
+            <span>Search {activeCatalogueTab.label.toLocaleLowerCase("en-IN")}</span>
             <input
               id="catalogue-search"
               type="search"
               value={query}
-              placeholder="Try lounge, Apple, hotel…"
+              placeholder={catalogueTab === "offers" ? "Try Apple, hotel, dining…" : catalogueTab === "benefits" ? "Try lounge, insurance, golf…" : "Try Marriott, Accor, Taj…"}
               onChange={(event) => setQuery(event.target.value)}
             />
           </label>

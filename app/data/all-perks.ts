@@ -21,11 +21,17 @@ function timesCategory(title: string, merchant: string): PerkCategory {
   return "Shopping";
 }
 
-function timesKind(section: string): PerkKind {
+function timesKind(section: string, title: string): PerkKind {
+  if (
+    title === "Annual Zomato Gold membership for your food ordering & dining needs" ||
+    title === "Premium global subscriptions in one membership" ||
+    title === "A wellness membership that has you fully covered" ||
+    title === "20% off on the standard membership"
+  ) {
+    return "membership";
+  }
   if (section === "EVENTS") return "event";
   if (section === "MILESTONES") return "milestone";
-  if (section === "BONUS REWARDS") return "rewards-program";
-  if (section === "WELCOME") return "card-benefit";
   if (section === "SIGNATURE BENEFITS") return "card-benefit";
   return "merchant-offer";
 }
@@ -51,7 +57,7 @@ const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
     title: benefit.title,
     ...extractedValue,
     category: timesCategory(benefit.title, benefit.merchant),
-    kind: timesKind(benefit.section),
+    kind: timesKind(benefit.section, benefit.title),
     status: expired ? "expired" : isCampaign ? "active" : "unclear",
     timingLabel: expired ? "Ended campaign" : benefit.tag ?? benefit.section.toLocaleLowerCase("en-IN"),
     summary: `A Times Black ${benefit.section.toLocaleLowerCase("en-IN")} listing. Check the official page for the redemption path and current availability.`,
@@ -112,7 +118,7 @@ const emiratesPerks: UnifiedPerk[] = [
     value: "Up to ₹750 off",
     valueAmount: 750,
     category: "Lifestyle",
-    kind: "card-benefit",
+    kind: "merchant-offer",
     status: "active",
     timingLabel: "Up to 4 times monthly",
     summary: "Use the card on an eligible BookMyShow booking for the second-ticket discount.",
