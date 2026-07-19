@@ -30,20 +30,41 @@ test("server-renders the Perq offer tracker", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Perq — Your credit card offers, simplified<\/title>/i);
-  assert.match(html, /All your card offers, without the fine print\./);
+  assert.match(html, /Every card benefit, ranked in one place\./);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
   assert.match(html, /Emirates Emeralde/);
-  assert.match(html, /Featured offers worth knowing about/);
-  assert.match(html, /All 68 Times Black benefits/);
+  assert.match(html, /Every offer\. One ranked list\./);
   assert.match(html, /Complimentary First-Class Lounge Access/);
-  assert.match(html, /Marshall Acton III/);
-  assert.match(html, /Candlelight/);
-  assert.match(html, /Check official source/);
-  assert.match(html, /Official details/);
+  assert.match(html, /Just For You personalized offers/);
+  assert.match(html, /Open official details/);
+  assert.match(html, /How ranking works/);
   assert.match(html, /og:image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
+});
+
+test("keeps issuer datasets in the unified catalogue", async () => {
+  const [amex, infinia, allPerks] = await Promise.all([
+    readFile(new URL("../app/data/amex-platinum.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/data/hdfc-infinia.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/data/all-perks.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(amex, /charge-platinum\/travel\.html/);
+  assert.match(amex, /charge-platinum\/retail\.html/);
+  assert.match(amex, /charge-platinum\/health-and-wellness\.html/);
+  assert.match(amex, /Amex Wednesdays/);
+  assert.match(infinia, /infinia-smartbuy-personalized/);
+  assert.equal((infinia.match(/id: "infinia-smartbuy-[^"]+july-2026"/g) ?? []).length, 14);
+  assert.equal((amex.match(/id: "amex-[^"]+"/g) ?? []).length, 75);
+  assert.equal((infinia.match(/id: "infinia-[^"]+"/g) ?? []).length, 32);
+  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 3);
+  assert.equal(68 + 75 + 32 + 3, 178);
+  assert.match(allPerks, /\.\.\.timesPerks/);
+  assert.match(allPerks, /\.\.\.amexPlatinumPerks/);
+  assert.match(allPerks, /\.\.\.hdfcInfiniaPerks/);
+  assert.match(allPerks, /\.\.\.emiratesPerks/);
 });
 
 test("removes starter assets and keeps local preferences private", async () => {
