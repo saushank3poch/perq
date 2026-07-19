@@ -35,8 +35,13 @@ test("server-renders the Perq offer tracker", async () => {
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
   assert.match(html, /Emirates Emeralde/);
-  assert.match(html, /14<\/strong> matches/);
+  assert.match(html, /Featured offers worth knowing about/);
+  assert.match(html, /All 68 Times Black benefits/);
+  assert.match(html, /Complimentary First-Class Lounge Access/);
+  assert.match(html, /Marshall Acton III/);
+  assert.match(html, /Candlelight/);
   assert.match(html, /Check official source/);
+  assert.match(html, /Official details/);
   assert.match(html, /og:image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
@@ -55,4 +60,34 @@ test("removes starter assets and keeps local preferences private", async () => {
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await access(new URL("../public/og.png", import.meta.url));
   await assert.rejects(access(new URL("../app/_sites-preview", import.meta.url)));
+});
+
+test("keeps the complete Times Black catalogue structurally sound", async () => {
+  const source = await readFile(
+    new URL("../app/times-black-benefits.ts", import.meta.url),
+    "utf8",
+  );
+  const match = source.match(
+    /timesBlackBenefits: TimesBlackBenefit\[\] = (\[[\s\S]*\]);/,
+  );
+  assert.ok(match, "Times Black data should remain a JSON-compatible array");
+
+  const benefits = JSON.parse(match[1]);
+  const expectedSections = new Set([
+    "WELCOME",
+    "SIGNATURE BENEFITS",
+    "MILESTONES",
+    "BONUS REWARDS",
+    "EVENTS",
+    "EXCLUSIVE DISCOUNTS",
+  ]);
+
+  assert.equal(benefits.length, 68);
+  assert.equal(new Set(benefits.map((benefit) => benefit.id)).size, 68);
+  assert.deepEqual(new Set(benefits.map((benefit) => benefit.section)), expectedSections);
+  assert.ok(
+    benefits.every((benefit) =>
+      benefit.source.startsWith("https://www.timesblack.com/benefits/"),
+    ),
+  );
 });

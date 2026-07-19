@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  timesBlackBenefits,
+  timesBlackSectionOrder,
+  type TimesBlackBenefitSection,
+} from "./times-black-benefits";
 
 type CardId = "times" | "amex" | "infinia" | "emirates";
 type Category = "All" | "Travel" | "Dining" | "Shopping" | "Rewards";
+type BenefitSectionFilter = "ALL" | TimesBlackBenefitSection;
 
 type Card = {
   id: CardId;
@@ -266,18 +272,25 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [sortBy, setSortBy] = useState("recommended");
   const [savedOffers, setSavedOffers] = useState<string[]>([]);
+  const [benefitSection, setBenefitSection] = useState<BenefitSectionFilter>("ALL");
+  const [benefitQuery, setBenefitQuery] = useState("");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const storedCards = window.localStorage.getItem("perq-selected-cards");
     const storedOffers = window.localStorage.getItem("perq-saved-offers");
 
-    if (storedCards) {
-      const parsed = JSON.parse(storedCards) as CardId[];
-      const valid = parsed.filter((id) => allCardIds.includes(id));
-      if (valid.length) setSelectedCards(valid);
+    try {
+      if (storedCards) {
+        const parsed = JSON.parse(storedCards) as CardId[];
+        const valid = parsed.filter((id) => allCardIds.includes(id));
+        if (valid.length) setSelectedCards(valid);
+      }
+      if (storedOffers) setSavedOffers(JSON.parse(storedOffers));
+    } catch {
+      window.localStorage.removeItem("perq-selected-cards");
+      window.localStorage.removeItem("perq-saved-offers");
     }
-    if (storedOffers) setSavedOffers(JSON.parse(storedOffers));
     setReady(true);
   }, []);
 
@@ -316,6 +329,18 @@ export default function Home() {
     (highest, offer) => Math.max(highest, offer.valueAmount),
     0,
   );
+
+  const visibleTimesBenefits = useMemo(() => {
+    const query = benefitQuery.trim().toLocaleLowerCase("en-IN");
+
+    return timesBlackBenefits.filter((benefit) => {
+      const matchesSection = benefitSection === "ALL" || benefit.section === benefitSection;
+      const haystack = `${benefit.merchant} ${benefit.title} ${benefit.tag ?? ""}`.toLocaleLowerCase(
+        "en-IN",
+      );
+      return matchesSection && (!query || haystack.includes(query));
+    });
+  }, [benefitQuery, benefitSection]);
 
   const toggleCard = (cardId: CardId) => {
     setSelectedCards((current) => {
@@ -426,9 +451,9 @@ export default function Home() {
         <div className="offers-intro">
           <div>
             <p className="eyebrow">Step 2</p>
-            <h2 id="offers-title">Offers worth knowing about</h2>
+            <h2 id="offers-title">Featured offers worth knowing about</h2>
           </div>
-          <div className="offer-stats" aria-label="Offer summary">
+          <div className="offer-stats" aria-label="Offer summary" aria-live="polite">
             <span><strong>{visibleOffers.length}</strong> matches</span>
             <span><strong>{expiringSoon}</strong> ending soon</span>
             <span>
@@ -515,6 +540,116 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {selectedCards.includes("times") && (
+        <section className="benefits-library" aria-labelledby="benefits-library-title">
+          <div className="benefit-library-header">
+            <div>
+              <p className="eyebrow">Complete card library</p>
+              <h2 id="benefits-library-title">All 68 Times Black benefits</h2>
+            </div>
+            <p>
+              The full official index across welcome benefits, signature perks, milestones,
+              bonus rewards, events and exclusive discounts—not just the highlights above.
+            </p>
+          </div>
+
+          <div className="benefit-caveat">
+            <strong>Listed does not always mean active.</strong>
+            <span>
+              Times Black still shows a few ended campaigns, eligibility-only benefits and
+              pages without clear end dates. Open the official details before relying on one.
+            </span>
+          </div>
+
+          <div className="benefit-controls">
+            <label className="benefit-search" htmlFor="benefit-search">
+              <span>Search benefits</span>
+              <input
+                id="benefit-search"
+                type="search"
+                value={benefitQuery}
+                placeholder="Try lounge, hotel, Apple…"
+                onChange={(event) => setBenefitQuery(event.target.value)}
+              />
+            </label>
+            <div className="benefit-section-tabs" role="group" aria-label="Times Black sections">
+              {(["ALL", ...timesBlackSectionOrder] as BenefitSectionFilter[]).map((section) => {
+                const count =
+                  section === "ALL"
+                    ? timesBlackBenefits.length
+                    : timesBlackBenefits.filter((benefit) => benefit.section === section).length;
+                return (
+                  <button
+                    key={section}
+                    type="button"
+                    aria-pressed={benefitSection === section}
+                    className={benefitSection === section ? "active" : ""}
+                    onClick={() => setBenefitSection(section)}
+                  >
+                    <span>{section === "ALL" ? "All" : section.toLocaleLowerCase("en-IN")}</span>
+                    <b>{count}</b>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <p className="benefit-results-count" aria-live="polite">
+            Showing {formatCount(visibleTimesBenefits.length, "benefit")}
+          </p>
+
+          {visibleTimesBenefits.length ? (
+            <div className="benefit-groups">
+              {timesBlackSectionOrder.map((section) => {
+                const sectionBenefits = visibleTimesBenefits.filter(
+                  (benefit) => benefit.section === section,
+                );
+                if (!sectionBenefits.length) return null;
+
+                return (
+                  <details
+                    className="benefit-group"
+                    key={section}
+                    open={
+                      benefitSection !== "ALL" ||
+                      Boolean(benefitQuery.trim()) ||
+                      section === "WELCOME"
+                    }
+                  >
+                    <summary>
+                      <span>{section.toLocaleLowerCase("en-IN")}</span>
+                      <b>{sectionBenefits.length}</b>
+                    </summary>
+                    <div className="benefit-list">
+                      {sectionBenefits.map((benefit) => (
+                        <article className="benefit-row" key={benefit.id}>
+                          <div className="benefit-row-main">
+                            <p>{benefit.merchant}</p>
+                            <h3>{benefit.title}</h3>
+                          </div>
+                          <div className="benefit-row-meta">
+                            {benefit.tag && <span>{benefit.tag}</span>}
+                            <a href={benefit.source} target="_blank" rel="noreferrer">
+                              Official details ↗
+                            </a>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="empty-state benefit-empty-state">
+              <span aria-hidden="true">⌕</span>
+              <h3>No benefit found</h3>
+              <p>Try a merchant, perk or another official section.</p>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="how-it-works" aria-labelledby="how-title">
         <div>
