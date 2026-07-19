@@ -59,6 +59,19 @@ test("keeps issuer datasets in the unified catalogue", async () => {
   assert.match(amex, /Amex Wednesdays/);
   assert.match(infinia, /infinia-smartbuy-personalized/);
   assert.equal((infinia.match(/id: "infinia-smartbuy-[^"]+july-2026"/g) ?? []).length, 14);
+  const smartBuyChannels = [...infinia.matchAll(/smartBuyChannel\(\{([\s\S]*?)\n  \}\),/g)].map(
+    (match) => match[1],
+  );
+  assert.equal(smartBuyChannels.length, 14);
+  assert.ok(
+    smartBuyChannels
+      .filter((channel) => /Reward Points/.test(channel))
+      .every((channel) => /category: "Rewards"/.test(channel)),
+  );
+  assert.match(
+    smartBuyChannels.find((channel) => /MyEMIShop/.test(channel)) ?? "",
+    /category: "Shopping"/,
+  );
   assert.equal((amex.match(/id: "amex-[^"]+"/g) ?? []).length, 75);
   assert.equal((infinia.match(/id: "infinia-[^"]+"/g) ?? []).length, 32);
   assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 3);
