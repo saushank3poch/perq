@@ -180,20 +180,28 @@ export default function Home() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    let selectedFromStorage: CardId[] | null = null;
+    let savedFromStorage: string[] | null = null;
+
     try {
       const storedCards = window.localStorage.getItem("perq-selected-cards");
       const storedPerks = window.localStorage.getItem("perq-saved-offers");
       if (storedCards) {
         const parsed = JSON.parse(storedCards) as CardId[];
         const valid = parsed.filter((id) => allCardIds.includes(id));
-        if (valid.length) setSelectedCards(valid);
+        if (valid.length) selectedFromStorage = valid;
       }
-      if (storedPerks) setSavedPerks(JSON.parse(storedPerks));
+      if (storedPerks) savedFromStorage = JSON.parse(storedPerks) as string[];
     } catch {
       window.localStorage.removeItem("perq-selected-cards");
       window.localStorage.removeItem("perq-saved-offers");
     }
-    setReady(true);
+
+    queueMicrotask(() => {
+      if (selectedFromStorage) setSelectedCards(selectedFromStorage);
+      if (savedFromStorage) setSavedPerks(savedFromStorage);
+      setReady(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -324,7 +332,7 @@ export default function Home() {
           <button className="primary-action" type="button" onClick={scrollToCatalogue}>
             See my ranked list <span aria-hidden="true">↓</span>
           </button>
-          <p className="source-note">Public official sources · Checked 19 Jul 2026</p>
+          <p className="source-note">India demo · source snapshot checked 19 Jul 2026</p>
         </div>
 
         {topPerk && (
@@ -541,8 +549,9 @@ export default function Home() {
           <span>Perq</span>
         </a>
         <p>
-          An independent personal tracker. Public inventories can change and login-only offers
-          may differ; issuer terms remain the final word. No card numbers are collected.
+          An independent personal tracker. This India inventory is a dated demo; the community
+          catalogue shares only card identities and official pages. Issuer terms remain the final
+          word. No card numbers are collected.
         </p>
         <a href="#wallet-title">Update my cards ↑</a>
       </footer>

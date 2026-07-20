@@ -31,6 +31,7 @@ test("server-renders the Perq offer tracker", async () => {
   const html = await response.text();
   assert.match(html, /<title>Perq — Your credit card offers, simplified<\/title>/i);
   assert.match(html, /Every card benefit, ranked in one place\./);
+  assert.match(html, /India demo · source snapshot checked 19 Jul 2026/);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);

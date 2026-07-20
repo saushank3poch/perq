@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "cards": [
+    {
+      "id": "in-icici-times-black",
+      "country": "IN",
+      "issuer": "ICICI Bank",
+      "name": "Times Black",
+      "sources": [
+        { "kind": "benefits", "label": "Welcome benefits", "url": "https://www.timesblack.com/benefits/welcome" },
+        { "kind": "benefits", "label": "Signature benefits", "url": "https://www.timesblack.com/benefits/signature-benefits" },
+        { "kind": "benefits", "label": "Milestones", "url": "https://www.timesblack.com/benefits/milestones" },
+        { "kind": "offers", "label": "Exclusive discounts", "url": "https://www.timesblack.com/benefits/exclusive-discounts" },
+        { "kind": "offers", "label": "Bonus rewards", "url": "https://www.timesblack.com/benefits/bonus-rewards" },
+        { "kind": "events", "label": "Events", "url": "https://www.timesblack.com/benefits/events" }
+      ]
+    },
+    {
+      "id": "in-amex-platinum",
+      "country": "IN",
+      "issuer": "American Express",
+      "name": "Platinum Card",
+      "sources": [
+        { "kind": "benefits", "label": "Platinum benefits", "url": "https://www.americanexpress.com/in/benefits/the-platinum-card/index.html" },
+        { "kind": "offers", "label": "Travel offers", "url": "https://www.americanexpress.com/en-in/benefits/amex-offers/offers/charge-platinum/travel.html" },
+        { "kind": "offers", "label": "Retail offers", "url": "https://www.americanexpress.com/en-in/benefits/amex-offers/offers/charge-platinum/retail.html" },
+        { "kind": "offers", "label": "Health and wellness offers", "url": "https://www.americanexpress.com/en-in/benefits/amex-offers/offers/charge-platinum/health-and-wellness.html" },
+        { "kind": "offers", "label": "Dining offers", "url": "https://www.americanexpress.com/en-in/benefits/amex-offers/dining/offer-locator/" }
+      ]
+    },
+    {
+      "id": "in-hdfc-infinia-metal",
+      "country": "IN",
+      "issuer": "HDFC Bank",
+      "name": "Infinia Metal",
+      "sources": [
+        { "kind": "card", "label": "Infinia card page", "url": "https://www.hdfc.bank.in/credit-cards/infinia-credit-card" },
+        { "kind": "rewards", "label": "Infinia SmartBuy", "url": "https://offers.smartbuy.hdfc.bank.in/v2/infinia/home" },
+        { "kind": "rewards", "label": "Reward Points terms", "url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/infinia-credit-card/rewards-points-program-terms-and-conditions.pdf" }
+      ]
+    },
+    {
+      "id": "in-icici-emirates-emeralde-skywards",
+      "country": "IN",
+      "issuer": "ICICI Bank",
+      "name": "Emirates Emeralde Skywards",
+      "sources": [
+        { "kind": "card", "label": "Emirates Emeralde Skywards card page", "url": "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde" }
+      ]
+    }
+  ]
+}
