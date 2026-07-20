@@ -1,6 +1,6 @@
 import type { UnifiedPerk } from "./types";
 
-const checkedAt = "2026-07-19";
+const checkedAt = "2026-07-20";
 const cardPage = "https://www.hdfc.bank.in/credit-cards/infinia-credit-card";
 const smartBuyHome = "https://offers.smartbuy.hdfc.bank.in/v2/infinia/home";
 const smartBuyJulyTerms =

@@ -3,7 +3,8 @@ import { amexPlatinumPerks } from "./amex-platinum";
 import { hdfcInfiniaPerks } from "./hdfc-infinia";
 import type { PerkCategory, PerkKind, UnifiedPerk } from "./types";
 
-const CHECKED_AT = "2026-07-19";
+const TIMES_CHECKED_AT = "2026-07-19";
+const EMIRATES_CHECKED_AT = "2026-07-20";
 
 function timesCategory(title: string, merchant: string): PerkCategory {
   const text = `${title} ${merchant}`.toLocaleLowerCase("en-IN");
@@ -63,7 +64,7 @@ const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
     summary: `A Times Black ${benefit.section.toLocaleLowerCase("en-IN")} listing. Check the official page for the redemption path and current availability.`,
     important: "Eligibility, inventory, participating locations and redemption windows can change. Times Black may continue listing a benefit after its campaign ends.",
     source: benefit.source,
-    checkedAt: CHECKED_AT,
+    checkedAt: TIMES_CHECKED_AT,
     rankBoost:
       benefit.section === "EVENTS"
         ? 10
@@ -91,7 +92,7 @@ const emiratesPerks: UnifiedPerk[] = [
     summary: "Test the code on Emirates before comparing the final fare with other booking channels.",
     important: "Eligible routes, cabins, travel dates and fare conditions apply. Confirm that the code still validates before paying.",
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
-    checkedAt: CHECKED_AT,
+    checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 5,
   },
   {
@@ -107,7 +108,7 @@ const emiratesPerks: UnifiedPerk[] = [
     summary: "Confirm the miles land after renewal and keep the correct Skywards account linked.",
     important: "Annual fee, account status and issuer fulfilment conditions apply.",
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
-    checkedAt: CHECKED_AT,
+    checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 8,
   },
   {
@@ -124,7 +125,7 @@ const emiratesPerks: UnifiedPerk[] = [
     summary: "Use the card on an eligible BookMyShow booking for the second-ticket discount.",
     important: "Monthly usage, ticket, show and platform restrictions apply.",
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
-    checkedAt: CHECKED_AT,
+    checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 4,
   },
 ];
