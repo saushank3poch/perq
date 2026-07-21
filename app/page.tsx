@@ -332,7 +332,7 @@ export default function Home() {
           <button className="primary-action" type="button" onClick={scrollToCatalogue}>
             See my ranked list <span aria-hidden="true">↓</span>
           </button>
-          <p className="source-note">India demo · source snapshot checked 19 Jul 2026</p>
+          <p className="source-note">India demo · source snapshot checked 21 Jul 2026</p>
         </div>
 
         {topPerk && (

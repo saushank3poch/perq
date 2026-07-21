@@ -32,7 +32,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "merchant": "LOHONO | EASEMYTRIP",
     "title": "Choose between a ₹12,000 Lohono voucher or a ₹10,000 EaseMyTrip voucher",
     "tag": null,
-    "source": "https://www.timesblack.com/benefits/choice/welcome/LOHONO%20|%20EASEMYTRIP",
+    "source": "https://www.timesblack.com/benefits",
     "updatedAt": "2025-09-12T09:42:55.038+00:00"
   },
   {
@@ -41,7 +41,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "merchant": "ADANI | SHALIMAR | ENCALM",
     "title": "Complimentary First-Class Lounge Access for Two in Mumbai, Delhi or Bengaluru",
     "tag": "Eligibility-Based",
-    "source": "https://www.timesblack.com/benefits/choice/exclusive-discounts/first-class-lounge",
+    "source": "https://www.timesblack.com/benefits/exclusive-discounts",
     "updatedAt": "2026-07-17T09:00:47.807+00:00"
   },
   {
@@ -50,7 +50,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "merchant": "ONEVASCO & MORE",
     "title": "Travel visa benefits worth ₹10,000 — Doorstep visa services, lounge access & more",
     "tag": "Exclusive",
-    "source": "https://www.timesblack.com/benefits/choice/welcome/One%20Vasco,%20Atlys",
+    "source": "https://www.timesblack.com/benefits",
     "updatedAt": "2025-11-26T06:45:54.566+00:00"
   },
   {
@@ -59,7 +59,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "merchant": "ADANI | NICOBAR | ENCALM",
     "title": "Complimentary Business-Class Lounge Access in Mumbai, Delhi, Bengaluru or Hyderabad",
     "tag": null,
-    "source": "https://www.timesblack.com/benefits/choice/exclusive-discounts/business-class-lounge",
+    "source": "https://www.timesblack.com/benefits/exclusive-discounts",
     "updatedAt": "2026-07-17T09:01:18.540+00:00"
   },
   {
@@ -149,7 +149,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "merchant": "AVIS | WEWORK | THUMBY",
     "title": "Choose between 10 WeWork passes and an airport transfer via helicopter or sedan",
     "tag": "Unlocks at 5L annual spend",
-    "source": "https://www.timesblack.com/benefits/choice/milestones/WEWORK%20|%20THUMBY%20|%20AVIS%20|%20ITH",
+    "source": "https://www.timesblack.com/benefits/milestones",
     "updatedAt": "2025-11-24T05:49:54.353+00:00"
   },
   {
@@ -248,7 +248,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "merchant": "LOHONO | AYATANA",
     "title": "Choose between Lohono voucher worth ₹20,000 and Ayatana stay worth ₹20,000",
     "tag": "Unlocks at 20L annual spend",
-    "source": "https://www.timesblack.com/benefits/choice/milestones/AYATANA%20|%20LOHONO%20STAYS",
+    "source": "https://www.timesblack.com/benefits/milestones",
     "updatedAt": "2025-08-31T19:07:47.456+00:00"
   },
   {

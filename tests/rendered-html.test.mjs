@@ -31,7 +31,7 @@ test("server-renders the Perq offer tracker", async () => {
   const html = await response.text();
   assert.match(html, /<title>Perq — Your credit card offers, simplified<\/title>/i);
   assert.match(html, /Every card benefit, ranked in one place\./);
-  assert.match(html, /India demo · source snapshot checked 19 Jul 2026/);
+  assert.match(html, /India demo · source snapshot checked 21 Jul 2026/);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
@@ -140,7 +140,7 @@ test("keeps the complete Times Black catalogue structurally sound", async () => 
   assert.deepEqual(new Set(benefits.map((benefit) => benefit.section)), expectedSections);
   assert.ok(
     benefits.every((benefit) =>
-      benefit.source.startsWith("https://www.timesblack.com/benefits/"),
+      benefit.source.startsWith("https://www.timesblack.com/benefits"),
     ),
   );
 });

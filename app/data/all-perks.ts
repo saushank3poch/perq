@@ -3,7 +3,7 @@ import { amexPlatinumPerks } from "./amex-platinum";
 import { hdfcInfiniaPerks } from "./hdfc-infinia";
 import type { PerkCategory, PerkKind, UnifiedPerk } from "./types";
 
-const TIMES_CHECKED_AT = "2026-07-19";
+const TIMES_CHECKED_AT = "2026-07-21";
 const EMIRATES_CHECKED_AT = "2026-07-21";
 
 function timesCategory(title: string, merchant: string): PerkCategory {
