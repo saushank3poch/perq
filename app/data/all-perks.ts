@@ -4,7 +4,7 @@ import { hdfcInfiniaPerks } from "./hdfc-infinia";
 import type { PerkCategory, PerkKind, UnifiedPerk } from "./types";
 
 const TIMES_CHECKED_AT = "2026-07-19";
-const EMIRATES_CHECKED_AT = "2026-07-20";
+const EMIRATES_CHECKED_AT = "2026-07-21";
 
 function timesCategory(title: string, merchant: string): PerkCategory {
   const text = `${title} ${merchant}`.toLocaleLowerCase("en-IN");
