@@ -28,6 +28,12 @@ The setup prompt can create a daily Codex automation using [prompts/daily-refres
 
 You can also use that prompt manually whenever you want a refresh.
 
+## Daily browser notification
+
+Perq can send one opt-in browser alert each day with offers starting or ending that day, including an all-clear when there are no matches. The site must be open; if the browser suspends the tab at the scheduled time, Perq sends the missed alert when the tab becomes active again that day.
+
+The template defaults to `12:00` in `Asia/Kolkata`. Change `time` or `timeZone` in [app/notification-config.ts](app/notification-config.ts) for a private copy. Each browser user must select **Enable alerts** once and grant notification permission.
+
 ## Contributing sources
 
 If a card is missing, Sites can first set it up privately from official URLs. It can then prepare a minimal, sanitized catalogue entry for you to review. Nothing is submitted without your approval.

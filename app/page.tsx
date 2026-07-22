@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { allPerks } from "./data/all-perks";
+import { notificationConfig } from "./notification-config";
+import {
+  buildNotificationCopy,
+  findTodayOffers,
+  getZonedScheduleState,
+  shouldSendDailyNotification,
+} from "./notification-schedule.mjs";
 import type {
   CardId,
   PerkCategory,
@@ -11,12 +19,14 @@ import type {
 } from "./data/types";
 
 type CategoryFilter = "All" | PerkCategory;
-type ViewFilter = "current" | "ending" | "ongoing" | "archive";
+type ViewFilter = "current" | "today" | "ending" | "ongoing" | "archive";
 type SortMode = "ranked" | "expiry" | "value";
 type CatalogueTab = "offers" | "benefits" | "memberships";
+type NotificationState = NotificationPermission | "unsupported";
 
 const GITHUB_REPO = "https://github.com/saushank3poch/perq";
-const CREATE_PRIVATE_PERQ = `${GITHUB_REPO}/generate`;
+const NOTIFICATIONS_ENABLED_KEY = "perq-notifications-enabled";
+const NOTIFICATION_LAST_SENT_KEY = "perq-notification-last-sent";
 
 type Card = {
   id: CardId;
@@ -46,6 +56,7 @@ const categories: CategoryFilter[] = [
 
 const views: { id: ViewFilter; label: string }[] = [
   { id: "current", label: "Current" },
+  { id: "today", label: "Today" },
   { id: "ending", label: "Ending soon" },
   { id: "ongoing", label: "Ongoing" },
   { id: "archive", label: "Archive" },
@@ -180,6 +191,9 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortMode>("ranked");
   const [query, setQuery] = useState("");
   const [savedPerks, setSavedPerks] = useState<string[]>([]);
+  const [notificationState, setNotificationState] =
+    useState<NotificationState>("unsupported");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -203,6 +217,13 @@ export default function Home() {
     queueMicrotask(() => {
       if (selectedFromStorage) setSelectedCards(selectedFromStorage);
       if (savedFromStorage) setSavedPerks(savedFromStorage);
+      if ("Notification" in window) {
+        setNotificationState(Notification.permission);
+        setNotificationsEnabled(
+          Notification.permission === "granted" &&
+            window.localStorage.getItem(NOTIFICATIONS_ENABLED_KEY) === "true",
+        );
+      }
       setReady(true);
     });
   }, []);
@@ -216,6 +237,77 @@ export default function Home() {
     if (!ready) return;
     window.localStorage.setItem("perq-saved-offers", JSON.stringify(savedPerks));
   }, [ready, savedPerks]);
+
+  useEffect(() => {
+    if (
+      !ready ||
+      !notificationsEnabled ||
+      notificationState !== "granted" ||
+      !("Notification" in window)
+    ) {
+      return;
+    }
+
+    const showDailyNotification = () => {
+      if (Notification.permission !== "granted") {
+        setNotificationState(Notification.permission);
+        setNotificationsEnabled(false);
+        window.localStorage.setItem(NOTIFICATIONS_ENABLED_KEY, "false");
+        return;
+      }
+
+      const lastSentDate = window.localStorage.getItem(NOTIFICATION_LAST_SENT_KEY);
+      const scheduleState = shouldSendDailyNotification({
+        now: new Date(),
+        timeZone: notificationConfig.timeZone,
+        configuredTime: notificationConfig.time,
+        lastSentDate,
+      });
+
+      if (!scheduleState.shouldSend) return;
+
+      const offerPerks = allPerks.filter((perk) => catalogueTabFor(perk) === "offers");
+      const matches = findTodayOffers(
+        offerPerks,
+        selectedCards,
+        scheduleState.dateKey,
+      ) as { starting: UnifiedPerk[]; ending: UnifiedPerk[] };
+      const copy = buildNotificationCopy(matches);
+      const notification = new Notification(copy.title, {
+        body: copy.body,
+        icon: "/favicon.svg",
+        tag: `perq-daily-${scheduleState.dateKey}`,
+      });
+
+      window.localStorage.setItem(NOTIFICATION_LAST_SENT_KEY, scheduleState.dateKey);
+      notification.onclick = () => {
+        window.focus();
+        setCatalogueTab("offers");
+        setCategory("All");
+        setView("today");
+        setQuery("");
+        window.location.hash = "catalogue";
+        window.setTimeout(() => {
+          document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth" });
+        }, 0);
+        notification.close();
+      };
+    };
+
+    showDailyNotification();
+    const interval = window.setInterval(showDailyNotification, 60_000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") showDailyNotification();
+    };
+    window.addEventListener("focus", showDailyNotification);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", showDailyNotification);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [notificationState, notificationsEnabled, ready, selectedCards]);
 
   const selectedCurrentPerks = useMemo(
     () =>
@@ -235,9 +327,18 @@ export default function Home() {
     const filtered = allPerks.filter((perk) => {
       const status = effectiveStatus(perk);
       const days = daysUntil(perk.endDate);
+      const today = getZonedScheduleState(
+        new Date(),
+        notificationConfig.timeZone,
+        notificationConfig.time,
+      ).dateKey;
       const matchesView =
         view === "archive"
           ? status === "expired"
+          : view === "today"
+            ? status !== "expired" &&
+              status !== "unclear" &&
+              (perk.startDate === today || perk.endDate === today)
           : view === "ending"
             ? status !== "expired" && days >= 0 && days <= 45
             : view === "ongoing"
@@ -303,6 +404,38 @@ export default function Home() {
     );
   };
 
+  const toggleNotifications = async () => {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false);
+      window.localStorage.setItem(NOTIFICATIONS_ENABLED_KEY, "false");
+      return;
+    }
+
+    if (!("Notification" in window)) {
+      setNotificationState("unsupported");
+      return;
+    }
+
+    const permission =
+      Notification.permission === "granted"
+        ? "granted"
+        : await Notification.requestPermission();
+    setNotificationState(permission);
+
+    const enabled = permission === "granted";
+    setNotificationsEnabled(enabled);
+    window.localStorage.setItem(NOTIFICATIONS_ENABLED_KEY, String(enabled));
+  };
+
+  const notificationStatus =
+    notificationState === "unsupported"
+      ? "This browser does not support notifications."
+      : notificationState === "denied"
+        ? "Notifications are blocked in your browser settings."
+        : notificationsEnabled
+          ? `Enabled · Daily at ${notificationConfig.time} (${notificationConfig.timeZone})`
+          : `Off · Daily at ${notificationConfig.time} (${notificationConfig.timeZone})`;
+
   const scrollToCatalogue = () => {
     document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -323,19 +456,20 @@ export default function Home() {
               <option value="uae" disabled>UAE — soon</option>
             </select>
           </div>
-          <a className="header-create-link" href={CREATE_PRIVATE_PERQ} target="_blank" rel="noreferrer">
-            Make it yours <span aria-hidden="true">↗</span>
-          </a>
+          <Link className="header-create-link" href="/make-it-yours">
+            Make it yours <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </header>
 
       <section className="hero" id="top" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <p className="eyebrow">The live credit-card benefit ranking</p>
+          <p className="eyebrow">Open source · Live India demo</p>
           <h1 id="hero-title">Use the right card. Before the perk expires.</h1>
           <p className="hero-subtitle">
-            Perq turns scattered official offer pages, card benefits, memberships and reward
-            routes into one ranked answer for the cards you actually carry.
+            <strong className="open-source-highlight">Open source.</strong> Perq turns scattered
+            official credit-card offer pages into one ranked, searchable view. Choose the cards
+            you carry, see what is active or ending soon, and save what matters.
           </p>
           <button className="primary-action" type="button" onClick={scrollToCatalogue}>
             Try the live demo <span aria-hidden="true">↓</span>
@@ -391,6 +525,20 @@ export default function Home() {
               </button>
             );
           })}
+        </div>
+        <div className="notification-panel">
+          <div>
+            <p className="notification-kicker">Daily browser alert</p>
+            <strong>Offers starting or ending today</strong>
+            <span aria-live="polite">{notificationStatus}</span>
+          </div>
+          <button
+            type="button"
+            onClick={toggleNotifications}
+            disabled={notificationState === "unsupported" || notificationState === "denied"}
+          >
+            {notificationsEnabled ? "Disable alerts" : "Enable alerts"}
+          </button>
         </div>
         <p className="coverage-note">
           HDFC “Just For You” inventory is login-gated, so it appears as a program row rather
@@ -566,9 +714,9 @@ export default function Home() {
             and refresh history stay in that copy.
           </p>
           <div className="ownership-actions">
-            <a className="primary-action ownership-primary" href={CREATE_PRIVATE_PERQ} target="_blank" rel="noreferrer">
-              Create my private Perq <span aria-hidden="true">↗</span>
-            </a>
+            <Link className="primary-action ownership-primary" href="/make-it-yours">
+              See how to make it yours <span aria-hidden="true">→</span>
+            </Link>
             <a className="text-action" href={GITHUB_REPO} target="_blank" rel="noreferrer">
               View the source on GitHub
             </a>
