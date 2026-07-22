@@ -29,8 +29,11 @@ test("server-renders the Perq offer tracker", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Perq — Your credit card offers, simplified<\/title>/i);
-  assert.match(html, /Every card benefit, ranked in one place\./);
+  assert.match(html, /<title>Perq — Use the right card before the perk expires<\/title>/i);
+  assert.match(html, /Use the right card\. Before the perk expires\./);
+  assert.match(html, /Try the live demo/);
+  assert.match(html, /Create my private Perq/);
+  assert.match(html, /github\.com\/saushank3poch\/perq\/generate/);
   assert.match(html, /India demo · source snapshot checked 22 Jul 2026/);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);

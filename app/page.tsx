@@ -15,6 +15,9 @@ type ViewFilter = "current" | "ending" | "ongoing" | "archive";
 type SortMode = "ranked" | "expiry" | "value";
 type CatalogueTab = "offers" | "benefits" | "memberships";
 
+const GITHUB_REPO = "https://github.com/saushank3poch/perq";
+const CREATE_PRIVATE_PERQ = `${GITHUB_REPO}/generate`;
+
 type Card = {
   id: CardId;
   short: string;
@@ -311,27 +314,37 @@ export default function Home() {
           <span className="brand-mark" aria-hidden="true">P</span>
           <span>Perq</span>
         </a>
-        <div className="country-control">
-          <label htmlFor="country">Offers for</label>
-          <select id="country" defaultValue="india" aria-label="Country">
-            <option value="india">🇮🇳 India</option>
-            <option value="singapore" disabled>Singapore — soon</option>
-            <option value="uae" disabled>UAE — soon</option>
-          </select>
+        <div className="header-actions">
+          <div className="country-control">
+            <label htmlFor="country">Demo for</label>
+            <select id="country" defaultValue="india" aria-label="Country">
+              <option value="india">🇮🇳 India</option>
+              <option value="singapore" disabled>Singapore — soon</option>
+              <option value="uae" disabled>UAE — soon</option>
+            </select>
+          </div>
+          <a className="header-create-link" href={CREATE_PRIVATE_PERQ} target="_blank" rel="noreferrer">
+            Make it yours <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </header>
 
       <section className="hero" id="top" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <p className="eyebrow">One wallet. One ranked answer.</p>
-          <h1 id="hero-title">Every card benefit, ranked in one place.</h1>
+          <p className="eyebrow">The live credit-card benefit ranking</p>
+          <h1 id="hero-title">Use the right card. Before the perk expires.</h1>
           <p className="hero-subtitle">
-            Perq combines official offer pages, card benefits, memberships, milestones and
-            reward routes—then ranks what is active and useful instead of making you hunt.
+            Perq turns scattered official offer pages, card benefits, memberships and reward
+            routes into one ranked answer for the cards you actually carry.
           </p>
           <button className="primary-action" type="button" onClick={scrollToCatalogue}>
-            See my ranked list <span aria-hidden="true">↓</span>
+            Try the live demo <span aria-hidden="true">↓</span>
           </button>
+          <div className="hero-proof" aria-label="Product details">
+            <span>180 tracked benefits</span>
+            <span>Official sources</span>
+            <span>No sign-up</span>
+          </div>
           <p className="source-note">India demo · source snapshot checked 22 Jul 2026</p>
         </div>
 
@@ -543,6 +556,31 @@ export default function Home() {
         </ol>
       </section>
 
+      <section className="make-it-yours" aria-labelledby="make-it-yours-title">
+        <div className="make-it-yours-copy">
+          <p className="eyebrow">Private by design</p>
+          <h2 id="make-it-yours-title">This demo is public. Your wallet does not have to be.</h2>
+          <p>
+            Perq is open source. Start from the public catalogue of official card pages, then
+            create a private copy for your country and cards. Your generated offers, saved items
+            and refresh history stay in that copy.
+          </p>
+          <div className="ownership-actions">
+            <a className="primary-action ownership-primary" href={CREATE_PRIVATE_PERQ} target="_blank" rel="noreferrer">
+              Create my private Perq <span aria-hidden="true">↗</span>
+            </a>
+            <a className="text-action" href={GITHUB_REPO} target="_blank" rel="noreferrer">
+              View the source on GitHub
+            </a>
+          </div>
+        </div>
+        <ol className="ownership-steps" aria-label="Create your private Perq">
+          <li><strong>01</strong><span>Create a private repository from Perq.</span></li>
+          <li><strong>02</strong><span>Tell Codex your country and exact cards.</span></li>
+          <li><strong>03</strong><span>Get your own tracker and daily source refresh.</span></li>
+        </ol>
+      </section>
+
       <footer>
         <a className="brand footer-brand" href="#top" aria-label="Perq home">
           <span className="brand-mark" aria-hidden="true">P</span>
@@ -553,7 +591,7 @@ export default function Home() {
           catalogue shares only card identities and official pages. Issuer terms remain the final
           word. No card numbers are collected.
         </p>
-        <a href="#wallet-title">Update my cards ↑</a>
+        <a href={GITHUB_REPO} target="_blank" rel="noreferrer">Open source ↗</a>
       </footer>
     </main>
   );

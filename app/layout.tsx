@@ -23,9 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.includes("localhost") ? "http" : "https");
   const metadataBase = new URL(`${protocol}://${host}`);
-  const title = "Perq — Your credit card offers, simplified";
+  const title = "Perq — Use the right card before the perk expires";
   const description =
-    "Select the cards in your wallet and see relevant India offers in plain English, with the best value, expiry, and important terms up front.";
+    "Perq ranks official credit-card offers, benefits, memberships and reward routes for the cards you carry—without collecting card numbers.";
 
   return {
     metadataBase,
