@@ -414,6 +414,15 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "updatedAt": "2026-05-30T06:59:18.522+00:00"
   },
   {
+    "id": "eddffbfa-a28d-456d-abb2-156072ca465f",
+    "section": "EXCLUSIVE DISCOUNTS",
+    "merchant": "NAPPA DORI",
+    "title": "The Regent Laptop Bag, Personalised For You",
+    "tag": "Limited Period Offer",
+    "source": "https://www.timesblack.com/benefits/exclusive-discounts/nappa-dori-laptop-bag",
+    "updatedAt": "2026-07-21T11:15:20.261+00:00"
+  },
+  {
     "id": "4428cfc4-e77a-495b-bc42-c6e4985f9017",
     "section": "EXCLUSIVE DISCOUNTS",
     "merchant": "AAYNA CLINIC",
@@ -556,6 +565,15 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "tag": "26th July 2026",
     "source": "https://www.timesblack.com/benefits/events/sunday-shakedown-mumbai",
     "updatedAt": "2026-07-08T08:08:04.805+00:00"
+  },
+  {
+    "id": "ed0d795e-7165-49e9-bd08-734d51a8b1a0",
+    "section": "EVENTS",
+    "merchant": "CHEF'S PLAY",
+    "title": "A Taste of Thailand – Reserved for You at Fireback, Hyderabad",
+    "tag": "8th August 2026",
+    "source": "https://www.timesblack.com/benefits/events/chefs-play-fireback",
+    "updatedAt": "2026-07-21T10:40:39.722+00:00"
   },
   {
     "id": "e8263c71-56c5-429c-80a8-bf6f5cbf5964",

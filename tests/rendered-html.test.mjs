@@ -31,7 +31,7 @@ test("server-renders the Perq offer tracker", async () => {
   const html = await response.text();
   assert.match(html, /<title>Perq — Your credit card offers, simplified<\/title>/i);
   assert.match(html, /Every card benefit, ranked in one place\./);
-  assert.match(html, /India demo · source snapshot checked 21 Jul 2026/);
+  assert.match(html, /India demo · source snapshot checked 22 Jul 2026/);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
@@ -76,7 +76,7 @@ test("keeps issuer datasets in the unified catalogue", async () => {
   assert.equal((amex.match(/id: "amex-[^"]+"/g) ?? []).length, 75);
   assert.equal((infinia.match(/id: "infinia-[^"]+"/g) ?? []).length, 32);
   assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 3);
-  assert.equal(68 + 75 + 32 + 3, 178);
+  assert.equal(70 + 75 + 32 + 3, 180);
   assert.match(allPerks, /\.\.\.timesPerks/);
   assert.match(allPerks, /\.\.\.amexPlatinumPerks/);
   assert.match(allPerks, /\.\.\.hdfcInfiniaPerks/);
@@ -135,8 +135,8 @@ test("keeps the complete Times Black catalogue structurally sound", async () => 
     "EXCLUSIVE DISCOUNTS",
   ]);
 
-  assert.equal(benefits.length, 68);
-  assert.equal(new Set(benefits.map((benefit) => benefit.id)).size, 68);
+  assert.equal(benefits.length, 70);
+  assert.equal(new Set(benefits.map((benefit) => benefit.id)).size, 70);
   assert.deepEqual(new Set(benefits.map((benefit) => benefit.section)), expectedSections);
   assert.ok(
     benefits.every((benefit) =>
