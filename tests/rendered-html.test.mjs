@@ -126,8 +126,8 @@ test("removes starter assets and keeps local preferences private", async () => {
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /localStorage\.setItem\("perq-selected-cards"/);
-  assert.match(page, /localStorage\.setItem\("perq-saved-offers"/);
+  assert.match(page, /writeLocalPreference\("perq-selected-cards"/);
+  assert.match(page, /writeLocalPreference\("perq-saved-offers"/);
   assert.match(layout, /generateMetadata/);
   assert.match(layout, /new URL\("\/og\.png", metadataBase\)/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
@@ -136,9 +136,10 @@ test("removes starter assets and keeps local preferences private", async () => {
 });
 
 test("keeps daily notifications opt-in and repository-configurable", async () => {
-  const [page, config, readme] = await Promise.all([
+  const [page, config, declarations, readme] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/notification-config.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/notification-schedule.d.mts", import.meta.url), "utf8"),
     readFile(new URL("../README.md", import.meta.url), "utf8"),
   ]);
 
@@ -147,8 +148,46 @@ test("keeps daily notifications opt-in and repository-configurable", async () =>
   assert.match(page, /Notification\.requestPermission\(\)/);
   assert.match(page, /perq-notification-last-sent/);
   assert.match(page, /view === "today"/);
+  assert.match(page, /delivery\.claimedDate = scheduleState\.dateKey/);
+  assert.match(page, /delivery\.disabledForSession = true/);
+  assert.match(page, /readLocalPreference\(NOTIFICATIONS_ENABLED_KEY\)/);
+  assert.match(page, /navigator\.locks\.request\(NOTIFICATION_DELIVERY_LOCK/);
+  assert.match(page, /this browser cannot coordinate delivery across tabs/);
+  assert.match(page, /delivery coordination failed in this browser/);
+  assert.match(page, /window\.addEventListener\("storage", handleStorage\)/);
+  assert.match(
+    page,
+    /event\.key === NOTIFICATIONS_ENABLED_KEY[\s\S]*?setNotificationState\(permission\)[\s\S]*?setNotificationsEnabled/,
+  );
+  assert.match(page, /new URLSearchParams\(window\.location\.search\)\.get\("view"\) === "today"/);
+  assert.match(page, /window\.location\.assign\("\/\?view=today#catalogue"\)/);
+  assert.match(page, /notification\.onclick = \(\) => \{/);
+  assert.match(page, /finally \{\s*notification\.close\(\)/);
+  assert.doesNotMatch(page, /findTodayOffers\([\s\S]*?\) as \{/);
+  assert.ok(
+    page.indexOf("notification.onclick =") <
+      page.indexOf("writeLocalPreference(NOTIFICATION_LAST_SENT_KEY"),
+    "notification click handling must be attached before marker persistence",
+  );
+  assert.ok(
+    page.indexOf("navigator.locks.request(NOTIFICATION_DELIVERY_LOCK") <
+      page.indexOf("const lastSentPreference = readLocalPreference(NOTIFICATION_LAST_SENT_KEY)") &&
+      page.indexOf("const lastSentPreference = readLocalPreference(NOTIFICATION_LAST_SENT_KEY)") <
+        page.indexOf("delivery.claimedDate = scheduleState.dateKey") &&
+      page.indexOf("delivery.claimedDate = scheduleState.dateKey") <
+        page.indexOf("writeLocalPreference(NOTIFICATION_LAST_SENT_KEY"),
+    "due-check, claim, delivery, and marker persistence must stay inside the cross-tab lock",
+  );
+  assert.match(
+    page,
+    /if \(enabled\) \{\s*notificationDelivery\.current\.disabledForSession = false;\s*notificationDelivery\.current\.inFlight = false;/,
+  );
+  assert.match(page, /Alert configuration error: check the notification time and time zone/);
+  assert.match(declarations, /findTodayOffers<T extends SchedulablePerk>/);
+  assert.match(declarations, /TodayOffers<T>/);
   assert.match(readme, /app\/notification-config\.ts/);
   assert.match(readme, /site must be open/i);
+  assert.match(readme, /00.*23.*00.*59/);
 });
 
 test("keeps the complete Times Black catalogue structurally sound", async () => {

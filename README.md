@@ -32,7 +32,7 @@ You can also use that prompt manually whenever you want a refresh.
 
 Perq can send one opt-in browser alert each day with offers starting or ending that day, including an all-clear when there are no matches. The site must be open; if the browser suspends the tab at the scheduled time, Perq sends the missed alert when the tab becomes active again that day.
 
-The template defaults to `12:00` in `Asia/Kolkata`. Change `time` or `timeZone` in [app/notification-config.ts](app/notification-config.ts) for a private copy. Each browser user must select **Enable alerts** once and grant notification permission.
+The template defaults to `12:00` in `Asia/Kolkata`. Change `time` or `timeZone` in [app/notification-config.ts](app/notification-config.ts) for a private copy. Use 24-hour `HH:MM` format (`00`–`23` hours and `00`–`59` minutes) and an IANA time zone such as `Asia/Kolkata`. Invalid settings pause alerts and show a configuration error without hiding the catalogue. Each browser user must select **Enable alerts** once and grant notification permission. Selecting an alert opens the durable Today view at `/?view=today#catalogue`.
 
 ## Contributing sources
 

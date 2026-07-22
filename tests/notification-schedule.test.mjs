@@ -54,6 +54,23 @@ test("sends once after noon and supports a same-day catch-up", () => {
     }).shouldSend,
     false,
   );
+
+  assert.equal(
+    shouldSendDailyNotification({
+      ...schedule,
+      now: new Date("2026-07-22T06:29:00.000Z"),
+      lastSentDate: "2026-07-21",
+    }).shouldSend,
+    false,
+  );
+  assert.equal(
+    shouldSendDailyNotification({
+      ...schedule,
+      now: new Date("2026-07-23T06:30:00.000Z"),
+      lastSentDate: "2026-07-22",
+    }).shouldSend,
+    true,
+  );
 });
 
 test("finds only trusted matches for selected cards", () => {
@@ -62,6 +79,7 @@ test("finds only trusted matches for selected cards", () => {
     { id: "ends", cardId: "amex", title: "Ends", status: "active", endDate: "2026-07-22" },
     { id: "other-card", cardId: "times", title: "Other", status: "active", endDate: "2026-07-22" },
     { id: "unclear", cardId: "amex", title: "Unclear", status: "unclear", endDate: "2026-07-22" },
+    { id: "expired", cardId: "amex", title: "Expired", status: "expired", endDate: "2026-07-22" },
   ];
 
   const matches = findTodayOffers(perks, ["amex"], "2026-07-22");
@@ -84,8 +102,18 @@ test("builds actionable and all-clear notification copy", () => {
 });
 
 test("rejects invalid configured times", () => {
+  for (const configuredTime of ["25:00", "12:60", "00:99"]) {
+    assert.throws(
+      () => getZonedScheduleState(new Date(), "Asia/Kolkata", configuredTime),
+      /Invalid notification time/,
+      configuredTime,
+    );
+  }
+});
+
+test("rejects invalid configured timezones", () => {
   assert.throws(
-    () => getZonedScheduleState(new Date(), "Asia/Kolkata", "25:00"),
-    /Invalid notification time/,
+    () => getZonedScheduleState(new Date(), "Not/A-Timezone", "12:00"),
+    /Invalid time zone/i,
   );
 });
