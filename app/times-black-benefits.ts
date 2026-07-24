@@ -438,7 +438,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "title": "Humanedge Essentials: Your foundation for precision longevity",
     "tag": "Exclusive Limited Period Offer",
     "source": "https://www.timesblack.com/benefits/exclusive-discounts/humanedge-offer",
-    "updatedAt": "2026-07-20T14:54:04.897+00:00"
+    "updatedAt": "2026-07-23T12:12:31.486+00:00"
   },
   {
     "id": "64d7cb28-b0ad-4eb4-a5ac-7d51910ac268",

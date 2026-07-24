@@ -3,8 +3,12 @@ import { amexPlatinumPerks } from "./amex-platinum";
 import { hdfcInfiniaPerks } from "./hdfc-infinia";
 import type { PerkCategory, PerkKind, UnifiedPerk } from "./types";
 
-const TIMES_CHECKED_AT = "2026-07-23";
-const EMIRATES_CHECKED_AT = "2026-07-23";
+const TIMES_CHECKED_AT = "2026-07-24";
+const EMIRATES_CHECKED_AT = "2026-07-24";
+const expiredTimesBenefitIds = new Set([
+  "a823b527-339e-4f96-ac84-5bd4aaa6dcb6",
+  "d7d19739-7855-44b2-8b02-ed4c23fd93bc",
+]);
 
 function timesCategory(title: string, merchant: string): PerkCategory {
   const text = `${title} ${merchant}`.toLocaleLowerCase("en-IN");
@@ -48,7 +52,7 @@ function timesValue(title: string, tag: string | null) {
 
 const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
   const extractedValue = timesValue(benefit.title, benefit.tag);
-  const expired = benefit.id === "a823b527-339e-4f96-ac84-5bd4aaa6dcb6";
+  const expired = expiredTimesBenefitIds.has(benefit.id);
   const isCampaign = benefit.section === "BONUS REWARDS" || benefit.section === "EVENTS";
 
   return {
@@ -80,6 +84,22 @@ const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
 
 const emiratesPerks: UnifiedPerk[] = [
   {
+    id: "emirates-joining-silver-tier",
+    cardId: "emirates",
+    provider: "Emirates Skywards",
+    title: "Receive joining miles and Emirates Skywards Silver Tier",
+    value: "10,000 miles + Silver Tier",
+    category: "Rewards",
+    kind: "card-benefit",
+    status: "active",
+    timingLabel: "Joining benefit",
+    summary: "The official card page lists 10,000 Skywards miles and Emirates Skywards Silver Tier for new cardholders.",
+    important: "Joining fee, account-linking, card approval and issuer fulfilment conditions apply.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 8,
+  },
+  {
     id: "emirates-flight-discount",
     cardId: "emirates",
     provider: "Emirates",
@@ -99,17 +119,81 @@ const emiratesPerks: UnifiedPerk[] = [
     id: "emirates-renewal-miles",
     cardId: "emirates",
     provider: "Emirates Skywards",
-    title: "Receive annual renewal miles",
-    value: "10,000 miles",
+    title: "Receive renewal miles and Emirates Skywards Gold Tier upgrade",
+    value: "10,000 miles + Gold Tier",
     category: "Rewards",
     kind: "card-benefit",
     status: "active",
     timingLabel: "On annual renewal",
-    summary: "Confirm the miles land after renewal and keep the correct Skywards account linked.",
-    important: "Annual fee, account status and issuer fulfilment conditions apply.",
+    summary: "The official card page lists 10,000 Skywards miles and an upgrade to Gold Tier on annual renewal.",
+    important: "Annual fee payment, account status, Skywards account-linking and issuer fulfilment conditions apply.",
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
     checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 8,
+  },
+  {
+    id: "emirates-lounge-access",
+    cardId: "emirates",
+    provider: "ICICI Bank",
+    title: "Use complimentary domestic and international airport lounges",
+    value: "Unlimited visits",
+    category: "Travel",
+    kind: "card-benefit",
+    status: "active",
+    timingLabel: "Primary cardholder",
+    summary: "The official card page lists complimentary international and domestic lounge access.",
+    important: "Access is listed for the primary cardholder. Network, airport, guest, validation and issuer conditions apply.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 7,
+  },
+  {
+    id: "emirates-skywards-earning",
+    cardId: "emirates",
+    provider: "Emirates Skywards",
+    title: "Earn Emirates Skywards miles on card spends",
+    value: "2 miles / ₹100",
+    category: "Rewards",
+    kind: "earning-channel",
+    status: "active",
+    timingLabel: "Domestic and international spends",
+    summary: "The official card page lists 2 Skywards miles per ₹100 on both domestic and international spends.",
+    important: "Miles are credited to the linked Emirates Skywards account after the billing cycle. Exclusions and account-status rules apply.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 7,
+  },
+  {
+    id: "emirates-gold-tier-milestone",
+    cardId: "emirates",
+    provider: "Emirates Skywards",
+    title: "Unlock Emirates Skywards Gold Tier after qualifying annual spend",
+    value: "Gold Tier",
+    category: "Rewards",
+    kind: "milestone",
+    status: "active",
+    timingLabel: "Anniversary-year spend",
+    summary: "Spend ₹15 lakh in the anniversary year, including at least ₹50,000 on Emirates flights, to qualify for a Gold Tier upgrade.",
+    important: "The card account must remain active and the annual fee must be paid. Emirates flight-spend and anniversary-year rules apply.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 6,
+  },
+  {
+    id: "emirates-fuel-surcharge-waiver",
+    cardId: "emirates",
+    provider: "ICICI Bank",
+    title: "Save the fuel surcharge on eligible fuel transactions",
+    value: "1% waiver",
+    category: "Travel",
+    kind: "card-benefit",
+    status: "active",
+    timingLabel: "Fuel transactions up to ₹4,000",
+    summary: "The official card page lists a 1% fuel surcharge waiver on fuel transactions up to ₹4,000.",
+    important: "Fuel-transaction caps, eligible outlets, statement credit timing and issuer exclusions apply.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 3,
   },
   {
     id: "emirates-bookmyshow",
@@ -122,8 +206,8 @@ const emiratesPerks: UnifiedPerk[] = [
     kind: "merchant-offer",
     status: "active",
     timingLabel: "Up to 4 times monthly",
-    summary: "Use the card on an eligible BookMyShow booking for the second-ticket discount.",
-    important: "Monthly usage, ticket, show and platform restrictions apply.",
+    summary: "Use the card on an eligible BookMyShow booking for the second-ticket discount after meeting the quarterly spend rule.",
+    important: "From 1 April 2026, cardholders must spend ₹25,000 or more in the preceding quarter. Monthly usage, ticket, show and platform restrictions apply.",
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
     checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 4,

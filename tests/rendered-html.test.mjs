@@ -95,8 +95,8 @@ test("keeps issuer datasets in the unified catalogue", async () => {
   );
   assert.equal((amex.match(/id: "amex-[^"]+"/g) ?? []).length, 75);
   assert.equal((infinia.match(/id: "infinia-[^"]+"/g) ?? []).length, 32);
-  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 3);
-  assert.equal(70 + 75 + 32 + 3, 180);
+  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 8);
+  assert.equal(70 + 75 + 32 + 8, 185);
   assert.match(allPerks, /\.\.\.timesPerks/);
   assert.match(allPerks, /\.\.\.amexPlatinumPerks/);
   assert.match(allPerks, /\.\.\.hdfcInfiniaPerks/);
