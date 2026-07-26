@@ -34,7 +34,7 @@ test("server-renders the Perq offer tracker", async () => {
   assert.match(html, /Try the live demo/);
   assert.match(html, /Open source\.<\/strong>/);
   assert.match(html, /href="\/make-it-yours"/);
-  assert.match(html, /India demo · source snapshot checked 22 Jul 2026/);
+  assert.match(html, /India demo · source snapshot checked 26 Jul 2026/);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
