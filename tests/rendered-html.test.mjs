@@ -78,8 +78,8 @@ test("keeps issuer datasets in the unified catalogue", async () => {
   );
   assert.equal((amex.match(/id: "amex-[^"]+"/g) ?? []).length, 75);
   assert.equal((infinia.match(/id: "infinia-[^"]+"/g) ?? []).length, 32);
-  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 3);
-  assert.equal(70 + 75 + 32 + 3, 180);
+  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 5);
+  assert.equal(71 + 75 + 32 + 5, 183);
   assert.match(allPerks, /\.\.\.timesPerks/);
   assert.match(allPerks, /\.\.\.amexPlatinumPerks/);
   assert.match(allPerks, /\.\.\.hdfcInfiniaPerks/);
@@ -138,8 +138,8 @@ test("keeps the complete Times Black catalogue structurally sound", async () => 
     "EXCLUSIVE DISCOUNTS",
   ]);
 
-  assert.equal(benefits.length, 70);
-  assert.equal(new Set(benefits.map((benefit) => benefit.id)).size, 70);
+  assert.equal(benefits.length, 71);
+  assert.equal(new Set(benefits.map((benefit) => benefit.id)).size, 71);
   assert.deepEqual(new Set(benefits.map((benefit) => benefit.section)), expectedSections);
   assert.ok(
     benefits.every((benefit) =>

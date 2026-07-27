@@ -3,8 +3,17 @@ import { amexPlatinumPerks } from "./amex-platinum";
 import { hdfcInfiniaPerks } from "./hdfc-infinia";
 import type { PerkCategory, PerkKind, UnifiedPerk } from "./types";
 
-const TIMES_CHECKED_AT = "2026-07-22";
-const EMIRATES_CHECKED_AT = "2026-07-22";
+const TIMES_CHECKED_AT = "2026-07-27";
+const EMIRATES_CHECKED_AT = "2026-07-27";
+
+const expiredTimesBenefitIds = new Set([
+  "a823b527-339e-4f96-ac84-5bd4aaa6dcb6",
+  "d7d19739-7855-44b2-8b02-ed4c23fd93bc",
+  "00f4eb8f-2b3b-444b-819e-5d2573c36c4a",
+  "6c456b76-c282-4cfb-a07f-b26400141313",
+  "51471b60-63e6-4a0b-90dc-a1f141778df6",
+  "10981757-07e9-4ba8-b4dd-03ff64c95f2d",
+]);
 
 function timesCategory(title: string, merchant: string): PerkCategory {
   const text = `${title} ${merchant}`.toLocaleLowerCase("en-IN");
@@ -48,7 +57,7 @@ function timesValue(title: string, tag: string | null) {
 
 const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
   const extractedValue = timesValue(benefit.title, benefit.tag);
-  const expired = benefit.id === "a823b527-339e-4f96-ac84-5bd4aaa6dcb6";
+  const expired = expiredTimesBenefitIds.has(benefit.id);
   const isCampaign = benefit.section === "BONUS REWARDS" || benefit.section === "EVENTS";
 
   return {
@@ -60,7 +69,11 @@ const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
     category: timesCategory(benefit.title, benefit.merchant),
     kind: timesKind(benefit.section, benefit.title),
     status: expired ? "expired" : isCampaign ? "active" : "unclear",
-    timingLabel: expired ? "Ended campaign" : benefit.tag ?? benefit.section.toLocaleLowerCase("en-IN"),
+    timingLabel: expired
+      ? benefit.section === "EVENTS"
+        ? "Event ended"
+        : "Removed from live catalogue"
+      : benefit.tag ?? benefit.section.toLocaleLowerCase("en-IN"),
     summary: `A Times Black ${benefit.section.toLocaleLowerCase("en-IN")} listing. Check the official page for the redemption path and current availability.`,
     important: "Eligibility, inventory, participating locations and redemption windows can change. Times Black may continue listing a benefit after its campaign ends.",
     source: benefit.source,
@@ -79,6 +92,23 @@ const timesPerks: UnifiedPerk[] = timesBlackBenefits.map((benefit) => {
 });
 
 const emiratesPerks: UnifiedPerk[] = [
+  {
+    id: "emirates-welcome-miles-silver-tier",
+    cardId: "emirates",
+    provider: "Emirates Skywards",
+    title: "Receive welcome miles and Skywards Silver Tier",
+    value: "10,000 miles + Silver Tier",
+    valueAmount: 10000,
+    category: "Rewards",
+    kind: "card-benefit",
+    status: "active",
+    timingLabel: "On card issuance",
+    summary: "Receive 10,000 Skywards miles and complimentary Emirates Skywards Silver Tier membership.",
+    important: "Miles, tier fulfilment and account-linking conditions apply under ICICI Bank and Emirates Skywards rules.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 7,
+  },
   {
     id: "emirates-flight-discount",
     cardId: "emirates",
@@ -99,14 +129,14 @@ const emiratesPerks: UnifiedPerk[] = [
     id: "emirates-renewal-miles",
     cardId: "emirates",
     provider: "Emirates Skywards",
-    title: "Receive annual renewal miles",
-    value: "10,000 miles",
+    title: "Receive renewal miles and Skywards Gold Tier",
+    value: "10,000 miles + Gold Tier",
     category: "Rewards",
     kind: "card-benefit",
     status: "active",
     timingLabel: "On annual renewal",
-    summary: "Confirm the miles land after renewal and keep the correct Skywards account linked.",
-    important: "Annual fee, account status and issuer fulfilment conditions apply.",
+    summary: "Receive 10,000 Skywards miles and an upgrade to Emirates Skywards Gold Tier on annual renewal.",
+    important: "Annual fee, account status, Skywards account linking and issuer fulfilment conditions apply.",
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
     checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 8,
@@ -127,6 +157,22 @@ const emiratesPerks: UnifiedPerk[] = [
     source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
     checkedAt: EMIRATES_CHECKED_AT,
     rankBoost: 4,
+  },
+  {
+    id: "emirates-lounge-access",
+    cardId: "emirates",
+    provider: "ICICI Bank",
+    title: "Unlimited domestic and international lounge access",
+    value: "Unlimited visits",
+    category: "Travel",
+    kind: "card-benefit",
+    status: "active",
+    timingLabel: "For primary cardholder",
+    summary: "Access eligible domestic and international airport lounges with the Emirates Emeralde card.",
+    important: "Complimentary access is listed for the primary cardholder; lounge network, card presentation and program rules apply.",
+    source: "https://www.icici.bank.in/personal-banking/cards/credit-card/emirates-skywards/emirates-emeralde",
+    checkedAt: EMIRATES_CHECKED_AT,
+    rankBoost: 8,
   },
 ];
 

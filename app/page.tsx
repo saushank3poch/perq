@@ -341,7 +341,7 @@ export default function Home() {
             Try the live demo <span aria-hidden="true">↓</span>
           </button>
           <div className="hero-proof" aria-label="Product details">
-            <span>180 tracked benefits</span>
+            <span>183 tracked benefits</span>
             <span>Official sources</span>
             <span>No sign-up</span>
           </div>

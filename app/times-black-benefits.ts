@@ -459,6 +459,15 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "updatedAt": "2026-06-04T15:30:35.724+00:00"
   },
   {
+    "id": "25faff35-d483-4b1f-a348-7d851f8b3d55",
+    "section": "EXCLUSIVE DISCOUNTS",
+    "merchant": "RELIANCE DIGITAL",
+    "title": "Complimentary Two-Year Comprehensive* Warranty on In-Store Purchases",
+    "tag": null,
+    "source": "https://www.timesblack.com/benefits/exclusive-discounts/reliance-insurance",
+    "updatedAt": "2026-07-26T07:17:23.952+00:00"
+  },
+  {
     "id": "92aa18d3-813a-4229-9059-91f410f9251f",
     "section": "WELCOME",
     "merchant": "THE QUORUM CLUB",
