@@ -12,7 +12,7 @@ Know which card benefit to use before it expires
 
 **Description**
 
-Perq turns scattered official credit-card offer pages into one ranked, searchable view. Choose the cards you carry, see what is active or ending soon, and save what matters. The live India demo needs no sign-up or card numbers; the open-source version can be made private.
+Open-source Perq turns scattered official credit-card offer pages into one ranked, searchable view. Choose the cards you carry, see what is active or ending soon, and save what matters. The live India demo needs no sign-up or card numbers, and your own version can live in a private copy.
 
 **Pricing**
 

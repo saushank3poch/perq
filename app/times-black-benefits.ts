@@ -159,7 +159,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "title": "Unlock a ₹12,000 Lohono Stay Voucher: Elevate Your Next Escape",
     "tag": "July Special",
     "source": "https://www.timesblack.com/benefits/bonus-rewards/lohono-spend-campaign",
-    "updatedAt": "2026-07-16T09:59:52.288+00:00"
+    "updatedAt": "2026-07-22T14:17:32.355+00:00"
   },
   {
     "id": "cfadd191-c5c7-4582-bf13-7798f3bcd533",

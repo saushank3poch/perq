@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { allPerks } from "./data/all-perks";
+import { notificationConfig } from "./notification-config";
+import {
+  buildNotificationCopy,
+  findTodayOffers,
+  getZonedScheduleState,
+  shouldSendDailyNotification,
+} from "./notification-schedule.mjs";
 import type {
   CardId,
   PerkCategory,
@@ -11,12 +19,15 @@ import type {
 } from "./data/types";
 
 type CategoryFilter = "All" | PerkCategory;
-type ViewFilter = "current" | "ending" | "ongoing" | "archive";
+type ViewFilter = "current" | "today" | "ending" | "ongoing" | "archive";
 type SortMode = "ranked" | "expiry" | "value";
 type CatalogueTab = "offers" | "benefits" | "memberships";
+type NotificationState = NotificationPermission | "unsupported";
 
 const GITHUB_REPO = "https://github.com/saushank3poch/perq";
-const CREATE_PRIVATE_PERQ = `${GITHUB_REPO}/generate`;
+const NOTIFICATIONS_ENABLED_KEY = "perq-notifications-enabled";
+const NOTIFICATION_LAST_SENT_KEY = "perq-notification-last-sent";
+const NOTIFICATION_DELIVERY_LOCK = "perq-daily-notification-delivery";
 
 type Card = {
   id: CardId;
@@ -46,6 +57,7 @@ const categories: CategoryFilter[] = [
 
 const views: { id: ViewFilter; label: string }[] = [
   { id: "current", label: "Current" },
+  { id: "today", label: "Today" },
   { id: "ending", label: "Ending soon" },
   { id: "ongoing", label: "Ongoing" },
   { id: "archive", label: "Archive" },
@@ -79,6 +91,49 @@ const catalogueTabs: {
 
 const allCardIds = cards.map((card) => card.id);
 const DAY = 1000 * 60 * 60 * 24;
+
+function readLocalPreference(key: string) {
+  try {
+    return { value: window.localStorage.getItem(key), failed: false } as const;
+  } catch {
+    return { value: null, failed: true } as const;
+  }
+}
+
+function writeLocalPreference(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function parseSelectedCards(value: string | null): CardId[] | null {
+  if (!value) return null;
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return null;
+    const valid = parsed.filter(
+      (id): id is CardId => typeof id === "string" && allCardIds.includes(id as CardId),
+    );
+    return valid.length ? valid : null;
+  } catch {
+    return null;
+  }
+}
+
+function notificationConfigurationError() {
+  try {
+    getZonedScheduleState(new Date(0), notificationConfig.timeZone, notificationConfig.time);
+    return null;
+  } catch {
+    return "Alert configuration error: check the notification time and time zone.";
+  }
+}
+
+const NOTIFICATION_CONFIGURATION_ERROR = notificationConfigurationError();
 
 function dateAtEndOfDay(date: string) {
   return new Date(`${date}T23:59:59+05:30`).getTime();
@@ -180,42 +235,233 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortMode>("ranked");
   const [query, setQuery] = useState("");
   const [savedPerks, setSavedPerks] = useState<string[]>([]);
+  const [notificationState, setNotificationState] =
+    useState<NotificationState>("unsupported");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationRuntimeError, setNotificationRuntimeError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const notificationDelivery = useRef({
+    claimedDate: null as string | null,
+    inFlight: false,
+    disabledForSession: false,
+  });
 
   useEffect(() => {
     let selectedFromStorage: CardId[] | null = null;
     let savedFromStorage: string[] | null = null;
 
-    try {
-      const storedCards = window.localStorage.getItem("perq-selected-cards");
-      const storedPerks = window.localStorage.getItem("perq-saved-offers");
-      if (storedCards) {
-        const parsed = JSON.parse(storedCards) as CardId[];
-        const valid = parsed.filter((id) => allCardIds.includes(id));
-        if (valid.length) selectedFromStorage = valid;
+    const storedCards = readLocalPreference("perq-selected-cards");
+    const storedPerks = readLocalPreference("perq-saved-offers");
+    selectedFromStorage = parseSelectedCards(storedCards.value);
+    if (storedPerks.value) {
+      try {
+        const parsed: unknown = JSON.parse(storedPerks.value);
+        if (Array.isArray(parsed) && parsed.every((id) => typeof id === "string")) {
+          savedFromStorage = parsed;
+        }
+      } catch {
+        // Keep defaults when a local preference is malformed.
       }
-      if (storedPerks) savedFromStorage = JSON.parse(storedPerks) as string[];
-    } catch {
-      window.localStorage.removeItem("perq-selected-cards");
-      window.localStorage.removeItem("perq-saved-offers");
     }
+
+    const wantsTodayView =
+      new URLSearchParams(window.location.search).get("view") === "today";
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === "perq-selected-cards") {
+        setSelectedCards(parseSelectedCards(event.newValue) ?? allCardIds);
+      }
+      if (event.key === NOTIFICATIONS_ENABLED_KEY) {
+        if ("Notification" in window) {
+          const permission = Notification.permission;
+          setNotificationState(permission);
+          setNotificationsEnabled(event.newValue === "true" && permission === "granted");
+        } else {
+          setNotificationState("unsupported");
+          setNotificationsEnabled(false);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorage);
 
     queueMicrotask(() => {
       if (selectedFromStorage) setSelectedCards(selectedFromStorage);
       if (savedFromStorage) setSavedPerks(savedFromStorage);
+      if (wantsTodayView) {
+        setCatalogueTab("offers");
+        setCategory("All");
+        setView("today");
+        setQuery("");
+      }
+      if ("Notification" in window) {
+        setNotificationState(Notification.permission);
+        const storedEnabled = readLocalPreference(NOTIFICATIONS_ENABLED_KEY);
+        setNotificationsEnabled(
+          Notification.permission === "granted" &&
+            !storedEnabled.failed &&
+            storedEnabled.value === "true",
+        );
+      }
       setReady(true);
     });
+
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   useEffect(() => {
     if (!ready) return;
-    window.localStorage.setItem("perq-selected-cards", JSON.stringify(selectedCards));
+    writeLocalPreference("perq-selected-cards", JSON.stringify(selectedCards));
   }, [ready, selectedCards]);
 
   useEffect(() => {
     if (!ready) return;
-    window.localStorage.setItem("perq-saved-offers", JSON.stringify(savedPerks));
+    writeLocalPreference("perq-saved-offers", JSON.stringify(savedPerks));
   }, [ready, savedPerks]);
+
+  useEffect(() => {
+    if (
+      !ready ||
+      !notificationsEnabled ||
+      notificationState !== "granted" ||
+      NOTIFICATION_CONFIGURATION_ERROR ||
+      !("Notification" in window)
+    ) {
+      return;
+    }
+
+    const showDailyNotification = async () => {
+      const delivery = notificationDelivery.current;
+      if (delivery.inFlight || delivery.disabledForSession) return;
+
+      if (Notification.permission !== "granted") {
+        setNotificationState(Notification.permission);
+        setNotificationsEnabled(false);
+        writeLocalPreference(NOTIFICATIONS_ENABLED_KEY, "false");
+        return;
+      }
+
+      if (!("locks" in navigator)) {
+        delivery.disabledForSession = true;
+        setNotificationsEnabled(false);
+        setNotificationRuntimeError(
+          "Alerts paused because this browser cannot coordinate delivery across tabs.",
+        );
+        return;
+      }
+
+      delivery.inFlight = true;
+      try {
+        await navigator.locks.request(NOTIFICATION_DELIVERY_LOCK, async () => {
+          const currentPermission = Notification.permission;
+          setNotificationState(currentPermission);
+          if (currentPermission !== "granted") {
+            setNotificationsEnabled(false);
+            writeLocalPreference(NOTIFICATIONS_ENABLED_KEY, "false");
+            return;
+          }
+
+          const enabledPreference = readLocalPreference(NOTIFICATIONS_ENABLED_KEY);
+          if (enabledPreference.failed) {
+            delivery.disabledForSession = true;
+            setNotificationsEnabled(false);
+            setNotificationRuntimeError("Alerts paused because browser storage is unavailable.");
+            return;
+          }
+          if (enabledPreference.value !== "true") {
+            setNotificationsEnabled(false);
+            return;
+          }
+
+          const lastSentPreference = readLocalPreference(NOTIFICATION_LAST_SENT_KEY);
+          if (lastSentPreference.failed) {
+            delivery.disabledForSession = true;
+            setNotificationsEnabled(false);
+            setNotificationRuntimeError("Alerts paused because browser storage is unavailable.");
+            return;
+          }
+
+          let scheduleState;
+          try {
+            scheduleState = shouldSendDailyNotification({
+              now: new Date(),
+              timeZone: notificationConfig.timeZone,
+              configuredTime: notificationConfig.time,
+              lastSentDate: lastSentPreference.value,
+            });
+          } catch {
+            delivery.disabledForSession = true;
+            setNotificationsEnabled(false);
+            setNotificationRuntimeError(
+              "Alert configuration error: check the notification time and time zone.",
+            );
+            return;
+          }
+
+          if (!scheduleState.shouldSend || delivery.claimedDate === scheduleState.dateKey) return;
+
+          delivery.claimedDate = scheduleState.dateKey;
+
+          const offerPerks = allPerks.filter((perk) => catalogueTabFor(perk) === "offers");
+          const matches = findTodayOffers(
+            offerPerks,
+            selectedCards,
+            scheduleState.dateKey,
+          );
+          const copy = buildNotificationCopy(matches);
+          try {
+            const notification = new Notification(copy.title, {
+              body: copy.body,
+              icon: "/favicon.svg",
+              tag: `perq-daily-${scheduleState.dateKey}`,
+            });
+
+            notification.onclick = () => {
+              window.focus();
+              try {
+                window.location.assign("/?view=today#catalogue");
+              } finally {
+                notification.close();
+              }
+            };
+
+            if (!writeLocalPreference(NOTIFICATION_LAST_SENT_KEY, scheduleState.dateKey)) {
+              delivery.disabledForSession = true;
+              setNotificationsEnabled(false);
+              setNotificationRuntimeError(
+                "Alert delivered, but browser storage is unavailable. This tab will not retry it.",
+              );
+            }
+          } catch {
+            delivery.disabledForSession = true;
+            setNotificationsEnabled(false);
+            setNotificationRuntimeError("Alerts paused after this browser could not show the alert.");
+          }
+        });
+      } catch {
+        delivery.disabledForSession = true;
+        setNotificationsEnabled(false);
+        setNotificationRuntimeError(
+          "Alerts paused because delivery coordination failed in this browser.",
+        );
+      } finally {
+        delivery.inFlight = false;
+      }
+    };
+
+    showDailyNotification();
+    const interval = window.setInterval(showDailyNotification, 60_000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") showDailyNotification();
+    };
+    window.addEventListener("focus", showDailyNotification);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", showDailyNotification);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [notificationState, notificationsEnabled, ready, selectedCards]);
 
   const selectedCurrentPerks = useMemo(
     () =>
@@ -232,12 +478,27 @@ export default function Home() {
 
   const visiblePerks = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("en-IN");
+    let today: string | null = null;
+    try {
+      today = getZonedScheduleState(
+        new Date(),
+        notificationConfig.timeZone,
+        notificationConfig.time,
+      ).dateKey;
+    } catch {
+      // Keep the catalogue usable while the Today view fails closed.
+    }
     const filtered = allPerks.filter((perk) => {
       const status = effectiveStatus(perk);
       const days = daysUntil(perk.endDate);
       const matchesView =
         view === "archive"
           ? status === "expired"
+          : view === "today"
+            ? status !== "expired" &&
+              status !== "unclear" &&
+              today !== null &&
+              (perk.startDate === today || perk.endDate === today)
           : view === "ending"
             ? status !== "expired" && days >= 0 && days <= 45
             : view === "ongoing"
@@ -303,6 +564,51 @@ export default function Home() {
     );
   };
 
+  const toggleNotifications = async () => {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false);
+      if (!writeLocalPreference(NOTIFICATIONS_ENABLED_KEY, "false")) {
+        setNotificationRuntimeError("Alerts are off for this tab, but browser storage is unavailable.");
+      }
+      return;
+    }
+
+    if (!("Notification" in window)) {
+      setNotificationState("unsupported");
+      return;
+    }
+
+    const permission =
+      Notification.permission === "granted"
+        ? "granted"
+        : await Notification.requestPermission();
+    setNotificationState(permission);
+
+    const enabled = permission === "granted";
+    if (!writeLocalPreference(NOTIFICATIONS_ENABLED_KEY, String(enabled))) {
+      setNotificationsEnabled(false);
+      setNotificationRuntimeError("Alerts could not be enabled because browser storage is unavailable.");
+      return;
+    }
+    if (enabled) {
+      notificationDelivery.current.disabledForSession = false;
+      notificationDelivery.current.inFlight = false;
+    }
+    setNotificationRuntimeError(null);
+    setNotificationsEnabled(enabled);
+  };
+
+  const notificationStatus =
+    NOTIFICATION_CONFIGURATION_ERROR ??
+    notificationRuntimeError ??
+    (notificationState === "unsupported"
+      ? "This browser does not support notifications."
+      : notificationState === "denied"
+        ? "Notifications are blocked in your browser settings."
+        : notificationsEnabled
+          ? `Enabled · Daily at ${notificationConfig.time} (${notificationConfig.timeZone})`
+          : `Off · Daily at ${notificationConfig.time} (${notificationConfig.timeZone})`);
+
   const scrollToCatalogue = () => {
     document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -323,19 +629,20 @@ export default function Home() {
               <option value="uae" disabled>UAE — soon</option>
             </select>
           </div>
-          <a className="header-create-link" href={CREATE_PRIVATE_PERQ} target="_blank" rel="noreferrer">
-            Make it yours <span aria-hidden="true">↗</span>
-          </a>
+          <Link className="header-create-link" href="/make-it-yours">
+            Make it yours <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </header>
 
       <section className="hero" id="top" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <p className="eyebrow">The live credit-card benefit ranking</p>
+          <p className="eyebrow">Open source · Live India demo</p>
           <h1 id="hero-title">Use the right card. Before the perk expires.</h1>
           <p className="hero-subtitle">
-            Perq turns scattered official offer pages, card benefits, memberships and reward
-            routes into one ranked answer for the cards you actually carry.
+            <strong className="open-source-highlight">Open source.</strong> Perq turns scattered
+            official credit-card offer pages into one ranked, searchable view. Choose the cards
+            you carry, see what is active or ending soon, and save what matters.
           </p>
           <button className="primary-action" type="button" onClick={scrollToCatalogue}>
             Try the live demo <span aria-hidden="true">↓</span>
@@ -391,6 +698,24 @@ export default function Home() {
               </button>
             );
           })}
+        </div>
+        <div className="notification-panel">
+          <div>
+            <p className="notification-kicker">Daily browser alert</p>
+            <strong>Offers starting or ending today</strong>
+            <span aria-live="polite">{notificationStatus}</span>
+          </div>
+          <button
+            type="button"
+            onClick={toggleNotifications}
+            disabled={
+              Boolean(NOTIFICATION_CONFIGURATION_ERROR) ||
+              notificationState === "unsupported" ||
+              notificationState === "denied"
+            }
+          >
+            {notificationsEnabled ? "Disable alerts" : "Enable alerts"}
+          </button>
         </div>
         <p className="coverage-note">
           HDFC “Just For You” inventory is login-gated, so it appears as a program row rather
@@ -566,9 +891,9 @@ export default function Home() {
             and refresh history stay in that copy.
           </p>
           <div className="ownership-actions">
-            <a className="primary-action ownership-primary" href={CREATE_PRIVATE_PERQ} target="_blank" rel="noreferrer">
-              Create my private Perq <span aria-hidden="true">↗</span>
-            </a>
+            <Link className="primary-action ownership-primary" href="/make-it-yours">
+              See how to make it yours <span aria-hidden="true">→</span>
+            </Link>
             <a className="text-action" href={GITHUB_REPO} target="_blank" rel="noreferrer">
               View the source on GitHub
             </a>
