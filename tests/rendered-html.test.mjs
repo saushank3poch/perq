@@ -34,7 +34,7 @@ test("server-renders the Perq offer tracker", async () => {
   assert.match(html, /Try the live demo/);
   assert.match(html, /Open source\.<\/strong>/);
   assert.match(html, /href="\/make-it-yours"/);
-  assert.match(html, /India demo · source snapshot checked 22 Jul 2026/);
+  assert.match(html, /India demo · source snapshot checked 26 Jul 2026/);
   assert.match(html, /Times Black/);
   assert.match(html, /Platinum Card/);
   assert.match(html, /Infinia Metal/);
@@ -95,8 +95,8 @@ test("keeps issuer datasets in the unified catalogue", async () => {
   );
   assert.equal((amex.match(/id: "amex-[^"]+"/g) ?? []).length, 75);
   assert.equal((infinia.match(/id: "infinia-[^"]+"/g) ?? []).length, 32);
-  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 5);
-  assert.equal(71 + 75 + 32 + 5, 183);
+  assert.equal((allPerks.match(/id: "emirates-[^"]+"/g) ?? []).length, 8);
+  assert.equal(71 + 75 + 32 + 8, 186);
   assert.match(allPerks, /\.\.\.timesPerks/);
   assert.match(allPerks, /\.\.\.amexPlatinumPerks/);
   assert.match(allPerks, /\.\.\.hdfcInfiniaPerks/);

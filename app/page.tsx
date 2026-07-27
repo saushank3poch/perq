@@ -648,11 +648,11 @@ export default function Home() {
             Try the live demo <span aria-hidden="true">↓</span>
           </button>
           <div className="hero-proof" aria-label="Product details">
-            <span>183 tracked benefits</span>
+            <span>186 tracked benefits</span>
             <span>Official sources</span>
             <span>No sign-up</span>
           </div>
-          <p className="source-note">India demo · source snapshot checked 22 Jul 2026</p>
+          <p className="source-note">India demo · source snapshot checked 26 Jul 2026</p>
         </div>
 
         {topPerk && (
