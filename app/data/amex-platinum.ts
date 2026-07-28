@@ -1,6 +1,6 @@
 import type { UnifiedPerk } from "./types";
 
-const CHECKED_AT = "2026-07-27";
+const CHECKED_AT = "2026-07-28";
 const AMEX_BASE = "https://www.americanexpress.com";
 const BENEFITS_SOURCE =
   `${AMEX_BASE}/in/benefits/the-platinum-card/index.html?hub=in_benefits_types_events_entertainment`;

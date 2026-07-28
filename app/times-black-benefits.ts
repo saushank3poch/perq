@@ -420,7 +420,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "title": "The Regent Laptop Bag, Personalised For You",
     "tag": "Limited Period Offer",
     "source": "https://www.timesblack.com/benefits/exclusive-discounts/nappa-dori-laptop-bag",
-    "updatedAt": "2026-07-21T11:15:20.261+00:00"
+    "updatedAt": "2026-07-27T11:30:03.557+00:00"
   },
   {
     "id": "4428cfc4-e77a-495b-bc42-c6e4985f9017",
@@ -438,7 +438,7 @@ export const timesBlackBenefits: TimesBlackBenefit[] = [
     "title": "Humanedge Essentials: Your foundation for precision longevity",
     "tag": "Exclusive Limited Period Offer",
     "source": "https://www.timesblack.com/benefits/exclusive-discounts/humanedge-offer",
-    "updatedAt": "2026-07-23T12:12:31.486+00:00"
+    "updatedAt": "2026-07-28T02:37:02.283+00:00"
   },
   {
     "id": "64d7cb28-b0ad-4eb4-a5ac-7d51910ac268",

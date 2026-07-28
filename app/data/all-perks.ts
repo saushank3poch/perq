@@ -3,8 +3,8 @@ import { amexPlatinumPerks } from "./amex-platinum";
 import { hdfcInfiniaPerks } from "./hdfc-infinia";
 import type { PerkCategory, PerkKind, UnifiedPerk } from "./types";
 
-const TIMES_CHECKED_AT = "2026-07-27";
-const EMIRATES_CHECKED_AT = "2026-07-27";
+const TIMES_CHECKED_AT = "2026-07-28";
+const EMIRATES_CHECKED_AT = "2026-07-28";
 
 const expiredTimesBenefitIds = new Set([
   "a823b527-339e-4f96-ac84-5bd4aaa6dcb6",
